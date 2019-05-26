@@ -8,6 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import reactor.core.publisher.Flux;
+
 @SpringBootApplication
 public class CoffeeBackendApplication {
 
@@ -18,11 +20,12 @@ public class CoffeeBackendApplication {
     @Bean
     public CommandLineRunner commandLineRunner(CoffeeRepository repository) {
         return args -> {
-            repository.deleteAll();
-            Stream.of("Cappucino", "Espresso", "Moccaccino")
-                    .map(name -> new Coffee(UUID.randomUUID().toString(), name))
-                    .map(repository::save)
-                    .forEach(System.out::println);
+            repository.deleteAll().thenMany(
+                    Flux.just("Cappucino", "Espresso", "Moccaccino")
+                            .map(name -> new Coffee(UUID.randomUUID().toString(), name))
+                            .flatMap(repository::save)
+
+            ).subscribe(System.out::println, throwable -> throwable.printStackTrace());
         };
     }
 }

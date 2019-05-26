@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/coffee")
@@ -17,26 +19,31 @@ public class CoffeeController {
     private final CoffeeService coffeeService;
 
     @GetMapping
-    public List<Coffee> findAll() {
+    public Flux<Coffee> findAll() {
         return coffeeService.findAll();
     }
 
     @GetMapping("{id}")
-    public Coffee findById(@PathVariable String id) {
+    public Mono<Coffee> findById(@PathVariable String id) {
         return coffeeService.findById(id)
-                .orElseThrow(CoffeeNotFoundException::new);
+                .switchIfEmpty(Mono.error(CoffeeNotFoundException::new));
     }
 
     @GetMapping("/randomCoffee/{name}")
-    public String getRandomCoffeeFor(@PathVariable String name) {
-        long totalCoffee = coffeeService.countCoffee();
-        int index = (int) (Math.abs(name.hashCode()) % totalCoffee);
-        return coffeeService.findAll()
-                .stream()
-                .skip(index)
+    public Mono<String> getRandomCoffeeFor(@PathVariable String name) {
+        Mono<Long> totalCoffee = coffeeService.countCoffee();
+        Mono<Integer> index = totalCoffee.map(total -> (int) (Math.abs(name.hashCode()) % total));
+        // int index = (int) (Math.abs(name.hashCode()) % totalCoffee);
+        return index.flatMap(position -> coffeeService.findAll()
+                        .elementAt(position)
                 .map(Coffee::getName)
-                .map(n -> '\n' + n + "\n\n")
-                .findFirst()
-                .orElse("No coffee for you!");
+                        .map(n -> '\n' + n + "\n\n"));
+        // return coffeeService.findAll()
+        //         .stream()
+        //         .skip(index)
+        //         .map(Coffee::getName)
+        //         .map(n -> '\n' + n + "\n\n")
+        //         .findFirst()
+        //         .orElse("No coffee for you!");
     }
 }

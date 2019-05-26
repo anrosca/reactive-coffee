@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -13,15 +15,15 @@ public class CoffeeService {
 
     private final CoffeeRepository coffeeRepository;
 
-    public List<Coffee> findAll() {
+    public Flux<Coffee> findAll() {
         return coffeeRepository.findAll();
     }
 
-    public Optional<Coffee> findById(String id) {
+    public Mono<Coffee> findById(String id) {
         return coffeeRepository.findById(id);
     }
 
-    public long countCoffee() {
+    public Mono<Long> countCoffee() {
         return coffeeRepository.count();
     }
 }

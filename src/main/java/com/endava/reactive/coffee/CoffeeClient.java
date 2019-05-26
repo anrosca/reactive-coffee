@@ -3,28 +3,39 @@ package com.endava.reactive.coffee;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Component
 public class CoffeeClient {
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    public CoffeeClient(RestTemplateBuilder builder) {
-        this.restTemplate = builder.rootUri("http://localhost:8081").build();
+    public CoffeeClient(WebClient.Builder builder) {
+        this.webClient = builder.baseUrl("http://localhost:8081").build();
     }
 
-    public List<Coffee> getAll() {
-        return Arrays.asList(restTemplate.getForObject("/coffee", Coffee[].class));
+    public Flux<Coffee> getAll() {
+        return webClient.get()
+                .uri("/coffee")
+                .retrieve()
+                .bodyToFlux(Coffee.class);
     }
 
-    public Coffee getById(String id) {
-        return restTemplate.getForObject("/coffee/{id}", Coffee.class, id);
+    public Mono<Coffee> getById(String id) {
+        return webClient.get()
+                .uri("/coffee/{id}", id)
+                .retrieve()
+                .bodyToMono(Coffee.class);
     }
 
-    public String randomCoffeeFor(String name) {
-        return restTemplate.getForObject("/coffee/randomCoffee/{name}", String.class, name);
+    public Mono<String> randomCoffeeFor(String name) {
+        return webClient.get()
+                .uri("/coffee/randomCoffee/{name}", name)
+                .retrieve()
+                .bodyToMono(String.class);
     }
 }
