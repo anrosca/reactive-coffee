@@ -21,7 +21,10 @@ public class CoffeeClient {
     }
 
     public Coffee getById(String id) {
-        return restTemplate.getForObject("/coffee/{id}", Coffee.class, id);
+        final Coffee coffee = restTemplate.getForObject("/coffee/{id}", Coffee.class, id);
+        final String details = restTemplate.getForObject("/coffee/{name}/details", String.class, coffee.getName());
+        coffee.setDetails(details);
+        return coffee;
     }
 
     public String randomCoffeeFor(String name) {

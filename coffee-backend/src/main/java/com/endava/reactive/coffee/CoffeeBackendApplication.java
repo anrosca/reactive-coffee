@@ -19,7 +19,7 @@ public class CoffeeBackendApplication {
     public CommandLineRunner commandLineRunner(CoffeeRepository repository) {
         return args -> {
             repository.deleteAll();
-            Stream.of("Cappucino", "Espresso", "Moccaccino")
+            Stream.of("Cappuccino", "Espresso", "Latte")
                     .map(name -> new Coffee(UUID.randomUUID().toString(), name))
                     .map(repository::save)
                     .forEach(System.out::println);

@@ -16,6 +16,8 @@ public class CoffeeController {
 
     private final CoffeeService coffeeService;
 
+    private final CoffeeDetailsRepository coffeeDetailsRepository;
+
     @GetMapping
     public List<Coffee> findAll() {
         return coffeeService.findAll();
@@ -25,6 +27,11 @@ public class CoffeeController {
     public Coffee findById(@PathVariable String id) {
         return coffeeService.findById(id)
                 .orElseThrow(CoffeeNotFoundException::new);
+    }
+
+    @GetMapping("{coffeeName}/details")
+    public String getCoffeeDetails(@PathVariable String coffeeName) {
+        return coffeeDetailsRepository.getDetailsFor(coffeeName);
     }
 
     @GetMapping("/randomCoffee/{name}")
