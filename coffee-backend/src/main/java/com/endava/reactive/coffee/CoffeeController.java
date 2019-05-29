@@ -16,8 +16,6 @@ public class CoffeeController {
 
     private final CoffeeService coffeeService;
 
-    private final CoffeeDetailsRepository coffeeDetailsRepository;
-
     @GetMapping
     public List<Coffee> findAll() {
         return coffeeService.findAll();
@@ -29,21 +27,13 @@ public class CoffeeController {
                 .orElseThrow(CoffeeNotFoundException::new);
     }
 
-    @GetMapping("{coffeeName}/details")
-    public String getCoffeeDetails(@PathVariable String coffeeName) {
-        return coffeeDetailsRepository.getDetailsFor(coffeeName);
+    @GetMapping("{id}/details")
+    public String getCoffeeDetails(@PathVariable String id) {
+        return coffeeService.getDetailsFor(id);
     }
 
     @GetMapping("/randomCoffee/{name}")
     public String getRandomCoffeeFor(@PathVariable String name) {
-        long totalCoffee = coffeeService.countCoffee();
-        int index = (int) (Math.abs(name.hashCode()) % totalCoffee);
-        return coffeeService.findAll()
-                .stream()
-                .skip(index)
-                .map(Coffee::getName)
-                .map(n -> '\n' + n + "\n\n")
-                .findFirst()
-                .orElse("No coffee for you!");
+        return coffeeService.getRandomCoffeeFor(name);
     }
 }

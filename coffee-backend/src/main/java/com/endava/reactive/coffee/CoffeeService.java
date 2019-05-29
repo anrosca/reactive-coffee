@@ -13,6 +13,8 @@ public class CoffeeService {
 
     private final CoffeeRepository coffeeRepository;
 
+    private final CoffeeDetailsRepository coffeeDetailsRepository;
+
     public List<Coffee> findAll() {
         return coffeeRepository.findAll();
     }
@@ -23,5 +25,33 @@ public class CoffeeService {
 
     public long countCoffee() {
         return coffeeRepository.count();
+    }
+
+    public void deleteAll() {
+        coffeeRepository.deleteAll();
+    }
+
+    public List<Coffee> saveAll(Iterable<Coffee> coffee) {
+        return coffeeRepository.saveAll(coffee);
+    }
+
+    public Coffee save(Coffee coffee) {
+        return coffeeRepository.save(coffee);
+    }
+
+    public String getRandomCoffeeFor(final String name) {
+        long totalCoffee = countCoffee();
+        int index = (int) (Math.abs(name.hashCode()) % totalCoffee);
+        return findAll()
+                .stream()
+                .skip(index)
+                .findFirst()
+                .map(Coffee::getName)
+                .map(n -> '\n' + n + "\n\n")
+                .orElse("No coffee for you!");
+    }
+
+    public String getDetailsFor(final String id) {
+        return coffeeDetailsRepository.getDetailsFor(id);
     }
 }
