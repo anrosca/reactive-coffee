@@ -22,7 +22,7 @@ public class CoffeeClient {
 
     public Coffee getById(String id) {
         final Coffee coffee = restTemplate.getForObject("/coffee/{id}", Coffee.class, id);
-        final String details = restTemplate.getForObject("/coffee/{name}/details", String.class, coffee.getName());
+        final String details = restTemplate.getForObject("/coffee/{id}/details", String.class, id);
         coffee.setDetails(details);
         return coffee;
     }

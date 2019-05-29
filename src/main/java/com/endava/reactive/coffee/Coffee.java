@@ -19,4 +19,9 @@ public class Coffee {
     public Coffee(final String name) {
         this.name = name;
     }
+
+    public Coffee(final String name, final String details) {
+        this.name = name;
+        this.details = details;
+    }
 }

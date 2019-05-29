@@ -1,6 +1,5 @@
 package com.endava.reactive.coffee;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.springframework.boot.CommandLineRunner;
@@ -16,12 +15,12 @@ public class CoffeeBackendApplication {
     }
 
     @Bean
-    public CommandLineRunner commandLineRunner(CoffeeRepository repository) {
+    public CommandLineRunner commandLineRunner(CoffeeService coffeeService) {
         return args -> {
-            repository.deleteAll();
+            coffeeService.deleteAll();
             Stream.of("Cappuccino", "Espresso", "Latte")
-                    .map(name -> new Coffee(UUID.randomUUID().toString(), name))
-                    .map(repository::save)
+                    .map(name -> new Coffee(Integer.toHexString(name.hashCode()), name))
+                    .map(coffeeService::save)
                     .forEach(System.out::println);
         };
     }
