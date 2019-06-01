@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import reactor.core.publisher.Mono;
+
 @Component
 public class CoffeeDetailsRepository {
 
@@ -19,7 +21,7 @@ public class CoffeeDetailsRepository {
                 "A double-shot of espresso mixed with approximately 5 oz. of steamed milk, typically little or no foam is added. Served in a large latte cup which are typically 9-12 oz. in capacity. To prepare flavored latte, simply add some quality coffee syrup such as Monin to taste.");
     }
 
-    public String getDetailsFor(String coffeeId) {
-        return coffeeDetails.getOrDefault(coffeeId.toLowerCase(), "No details for you!");
+    public Mono<String> getDetailsFor(String coffeeId) {
+        return Mono.just(coffeeDetails.getOrDefault(coffeeId.toLowerCase(), "No details for you!"));
     }
 }

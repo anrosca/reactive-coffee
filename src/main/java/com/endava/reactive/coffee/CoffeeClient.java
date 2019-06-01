@@ -5,29 +5,47 @@ import java.util.List;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Component
 public class CoffeeClient {
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    public CoffeeClient(RestTemplateBuilder builder) {
-        this.restTemplate = builder.rootUri("http://localhost:8081").build();
+    public CoffeeClient(WebClient.Builder builder) {
+        this.webClient = builder.baseUrl("http://localhost:8081").build();
     }
 
-    public List<Coffee> getAll() {
-        return Arrays.asList(restTemplate.getForObject("/coffee", Coffee[].class));
+    public Flux<Coffee> getAll() {
+        return webClient.get()
+        .uri("/coffee")
+                .retrieve()
+                .bodyToFlux(Coffee.class);
     }
 
-    public Coffee getById(String id) {
-        final Coffee coffee = restTemplate.getForObject("/coffee/{id}", Coffee.class, id);
-        final String details = restTemplate.getForObject("/coffee/{id}/details", String.class, id);
-        coffee.setDetails(details);
-        return coffee;
+    public Mono<Coffee> getById(String id) {
+        final Mono<Coffee> coffee = webClient.get()
+        .uri("/coffee/{id}", id)
+                .retrieve()
+                .bodyToMono(Coffee.class).doOnNext(item -> {
+                    System.out.println("!!!!" + Thread.currentThread().getName());
+                });
+        final Mono<String> details = webClient.get()
+        .uri("/coffee/{id}/details", id)
+                .retrieve()
+                .bodyToMono(String.class).doOnNext(item -> {
+                    System.out.println("!!!!" + Thread.currentThread().getName());
+                });;
+        return Mono.zip(coffee, details)
+                .map(tuple -> new Coffee(tuple.getT1().getName(), tuple.getT2()));
     }
 
-    public String randomCoffeeFor(String name) {
-        return restTemplate.getForObject("/coffee/randomCoffee/{name}", String.class, name);
+    public Mono<String> randomCoffeeFor(String name) {
+        return webClient.get()
+        .uri("/coffee/randomCoffee/{name}", name)
+                .retrieve().bodyToMono(String.class);
     }
 }
